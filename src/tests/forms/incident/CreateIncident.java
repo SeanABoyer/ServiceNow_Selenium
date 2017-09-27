@@ -7,11 +7,11 @@ import org.junit.Test;
 
 import tests.BaseTest;
 
-public class Create extends BaseTest{
+public class CreateIncident extends BaseTest{
 
-	private String IncNumber = null;
+	protected String IncNumber = null;
 	
-	public Create(String environment) {
+	public CreateIncident(String environment) {
 		super(environment);
 	}
 	
@@ -24,7 +24,6 @@ public class Create extends BaseTest{
 		serviceNow.waitUntilMandatoryReferenceFieldsPopulate(10);
 		
 		this.IncNumber = serviceNow.getFieldValueByLabel("Number");
-		
 		
 		serviceNow.clickButtonByLabel("SUBMIT");
 		
@@ -39,11 +38,11 @@ public class Create extends BaseTest{
 		}
 		//Run Validation to make sure things happened correctly
 		serviceNow.searchFor(this.IncNumber);
-		if(serviceNow.getFieldValueByLabel("Number") != "") {
-			assertTrue("The Incident was created successfully",true);
+		if(serviceNow.getFieldValueByLabel("Number").equalsIgnoreCase(this.IncNumber)) {
+			assertTrue("The Incident ["+this.IncNumber+"] was created successfully",true);
 		}
 		else {
-			fail("TESTING");
+			fail("The Incident ["+this.IncNumber+"] was NOT created successfully");
 		}
 
 	}

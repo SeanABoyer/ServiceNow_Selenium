@@ -28,7 +28,7 @@ public class BaseTest {
 	}
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		if(utils.Settings.getBrowser() == "Chrome") {
+		if(utils.Settings.getBrowser().equalsIgnoreCase("Chrome")) {
 			System.setProperty("webdriver.chrome.driver", "src/chromedriver.exe");
 			_driver = new ChromeDriver();
 		}
@@ -47,7 +47,7 @@ public class BaseTest {
 	@Before
 	public void setUp() {
 		_driver.get("https://"+_environment+".service-now.com/");
-		if (utils.Settings.getLogonType() == "BASIC_AUTH") {
+		if (utils.Settings.getLogonType().equalsIgnoreCase("BASIC_AUTH")) {
 			serviceNow.login(utils.Settings.getUserName(),utils.Settings.getPassWord());
 		}
 		
@@ -55,12 +55,12 @@ public class BaseTest {
 
 	@After
 	public void tearDown() throws Exception {
-		if (utils.Settings.getLogonType().equals("BASIC_AUTH")) {
+		if (utils.Settings.getLogonType().equalsIgnoreCase("BASIC_AUTH")) {
 			//Do Logout Stuff
 		}
 	}
 	
-	@Parameters(name = "{index}: {0}")
+	@Parameters(name = "{index}: {0}.service-now.com")
 	public static Object[] data(){
 		ArrayList<String> enviromentNames = utils.Settings.getEnviromentNames();
 		Object[] enviromentList = new Object[enviromentNames.size()];

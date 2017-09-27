@@ -25,7 +25,9 @@ public class ServiceNow {
 	/*
 	 * PRIVATE CLASSES
 	 */
-
+	
+	//TODO - Create a method to clear out the field completly before typing into it.
+	
 	private String getFieldType(WebElement element) {
 		//TODO:: Fix so that it works with only the given element, not the parents
 		this.focusForm(true);
