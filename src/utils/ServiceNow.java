@@ -1,11 +1,11 @@
 package utils;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.By.ByTagName;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -28,7 +28,7 @@ public class ServiceNow {
 	// Getters
 	//================================================================================
 	/**
-	 * @category Get Field ID TODO
+	 * @category Get Field ID
 	 */
 	private WebElement getFieldByID(String fieldID) {
 		this.focusForm(true);
@@ -49,14 +49,31 @@ public class ServiceNow {
 				break;
 			}
 		}
+		if(field == null) {
+			throw new NotFoundException("Field with the label of ["+fieldLabel+"] was not found.");
+		}
 		return field;
 	}
+	private String getFieldValueByElement(WebElement element) {
+		String value = null;
+		switch(this.getFieldType(element)) {
+		case "choice":
+			value = _driver.findElement(By.id(element.getAttribute("id").split("element.")[1])).findElement(By.cssSelector("[selected='SELECTED']")).getText();
+			break;
+		case "reference":
+			value = element.findElement(By.id("sys_display."+element.getAttribute("id").split("element.")[1])).getAttribute("value");
+			break;
+		default:
+			value = element.findElement(By.tagName("input")).getAttribute("value");
+		}
+		return value;
+	}
 	/**
-	 * @category Get Field Value ID TODO
+	 * @category Get Field Value ID 
 	 */
 	private String getFieldValueByID(String fieldID) {
 		WebElement field = getFieldByID(fieldID);
-		return field.findElement(By.tagName("input")).getAttribute("value");
+		return getFieldValueByElement(field);
 
 	}
 	/**
@@ -64,43 +81,47 @@ public class ServiceNow {
 	 */
 	public String getFieldValueByLabel(String fieldLabel) {
 		this.focusForm(true);
-		String value = null;
 		WebElement field = getFieldByLabel(fieldLabel);
-		switch(this.getFieldType(field)) {
-		case "choice":
-			value = _driver.findElement(By.id(field.getAttribute("id").split("element.")[1])).findElement(By.cssSelector("[selected='SELECTED']")).getText();
-			break;
-		default:
-			value = field.findElement(By.tagName("input")).getAttribute("value");;
+		return getFieldValueByElement(field);
+	}
+
+	/**
+	 * @category Get Tab Label
+	 */
+	private WebElement getTabByLabel(String tabLabel) {
+		WebElement tab = null;
+		List<WebElement> tabs = _driver.findElements(By.className("tabs2_tab"));
+		for (int i = 0; i < tabs.size(); i++) {
+			if (tabs.get(i).getText().endsWith(tabLabel)) {
+				tab = tabs.get(i);
+				break;
+			}
 		}
-		return value;
-	}
-	/**
-	 * @category Get Tab ID TODO
-	 */
-	private WebElement getTabByID(String tabID) {
-		return null;
+		return tab;
 		
 	}
 	/**
-	 * @category Get Tab Label TODO
-	 */
-	public WebElement getTabByLabel(String tabLabel) {
-		return null;
-		
-	}
-	/**
-	 * @category Get Button ID TODO
+	 * @category Get Button ID 
 	 */
 	private WebElement getButtonByID(String buttonID) {
-		return null;
+		WebElement button = _wait.until(ExpectedConditions.presenceOfElementLocated(By.id(buttonID)));
+		return button;
 		
 	}
 	/**
-	 * @category Get Button Label TODO
+	 * @category Get Button Label 
 	 */
 	private WebElement getButtonByLabel(String buttonLabel) {
-		return null;
+		WebElement button = null;
+		List<WebElement> buttonList = _wait
+				.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("button")));
+		for (int i = 0; i < buttonList.size(); i++) {
+			if (buttonList.get(i).getText().trim().equalsIgnoreCase(buttonLabel)) {
+				button = buttonList.get(i);
+				break;
+			}
+		}
+		return button;
 		
 	}
 	//================================================================================
@@ -140,14 +161,12 @@ public class ServiceNow {
 	}
 	
 	/**
-	 * @category Set Field ID TODO
-	 * 
-	 * TODO - refactor this method to not be redundant.
+	 * @category Set Field ID 
+	 * The fieldID must be the element.TABLENAME.FIELDNAME format
 	 */
-	private void populateFieldByID(WebElement field, String content) {
+	public void populateFieldByID(String fieldID, String content) {
 		this.focusForm(true);
-		WebElement element = _wait.until(ExpectedConditions.presenceOfElementLocated(By.id(field.getAttribute("id"))));
-		String fieldType = getFieldType(field);
+		WebElement element = _wait.until(ExpectedConditions.presenceOfElementLocated(By.id(fieldID)));
 		this.typeInElement(element, content);
 		this.focusForm(false);
 	}
@@ -167,65 +186,43 @@ public class ServiceNow {
 	/**
 	 * @category Click Tab Label
 	 */
+	
 	public void clickTabByLabel(String tabLabel) {
 		this.focusForm(true);
-		List<WebElement> tabs = _driver.findElements(By.className("tabs2_tab"));
-		for (int i = 0; i < tabs.size(); i++) {
-			if (tabs.get(i).getText().endsWith(tabLabel)) {
-				tabs.get(i).click();
-				break;
-			}
-		}
+		WebElement tab = getTabByLabel(tabLabel);
+		tab.click();
 	}
 	/**
 	 * @category Click Button ID
 	 */
-	private void clickButtonByID(String buttonID) {
+	public void clickButtonByID(String buttonID) {
 		this.focusForm(true);
-		WebElement button = _wait.until(ExpectedConditions.presenceOfElementLocated(By.id(buttonID)));
+		WebElement button = this.getButtonByID(buttonID);
 		button.click();
-		try {
-			Alert alert = _driver.switchTo().alert();
-			alert.accept();
-		} catch (Exception ex) {
-			// WHo Cares.. we were just trying to get rid of the alert
-		}
 	}
 
 	/**
 	 * @category Click Button Label
 	 */
-	public void clickButtonByLabel(String buttonlabel) {
+	public void clickButtonByLabel(String buttonLabel) {
 		this.focusForm(true);
-		WebElement button = null;
-		List<WebElement> buttonList = _wait
-				.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("button")));
-		for (int i = 0; i < buttonList.size(); i++) {
-			if (buttonList.get(i).getText().trim().equalsIgnoreCase(buttonlabel)) {
-				button = buttonList.get(i);
-				break;
-			}
-		}
+		WebElement button = this.getButtonByLabel(buttonLabel);
 		this.clickButtonByID(button.getAttribute("id"));
 	}
 	/**
 	 * @category Click Menu ID
 	 */
-	public void clickContextMenuItem(String contextMenuID, String contextMenuItemText) {
-		_action.moveToElement(_driver.findElement(By.id(contextMenuID)));
-		_action.contextClick(_driver.findElement(By.id(contextMenuID))).build().perform();
+	public void clickContextMenuItem(String menuItem) {
+		this.focusForm(true);
+		WebElement headerBar = _wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("container-fluid")));
+		_action.moveToElement(headerBar);
+		_action.contextClick().build().perform();
 		List<WebElement> contextItemList = _driver.findElements(By.className("context_item"));
 		for (int i = 0; i < contextItemList.size(); i++) {
-			if (contextItemList.get(i).getText().trim().equalsIgnoreCase(contextMenuItemText)) {
+			if (contextItemList.get(i).getText().trim().equalsIgnoreCase(menuItem)) {
 				contextItemList.get(i).click();
 				break;
 			}
-		}
-		try {
-			Alert alert = _driver.switchTo().alert();
-			alert.accept();
-		} catch (Exception ex) {
-			// WHo Cares.. we were just trying to get rid of the alert
 		}
 	}
 	//================================================================================
@@ -268,13 +265,6 @@ public class ServiceNow {
 		}
 	}
 
-	/*
-	 * PUBLIC CLASSES
-	 */
-
-
-
-
 	/**
 	 * @category TODO
 	 */
@@ -287,27 +277,25 @@ public class ServiceNow {
 		// ETC
 	}
 
-
-	
-
 	/**
 	 * Pauses code until all mandatory fields have been populated on the form
 	 * 
 	 * @param timeoutDurationSecs
 	 *            - an int in seconds for how long you would like to wait before
 	 *            timeout.
+	 * @throws TimeoutException 
 	 */
-	public void waitUntilMandatoryReferenceFieldsPopulate(int timeoutDurationSecs) {
-		// TODO - Get this working as intended
-		// StartTIme = time.now
+	public void waitUntilMandatoryReferenceFieldsPopulate(int timeoutDurationSecs) throws TimeoutException {
+		long StartTime = System.currentTimeMillis();
 		while (!mandatoryFieldsPopulated()) {
-			// if (StartTime + duration > CurrenTime)
-			// Throw Error
+			if (StartTime + timeoutDurationSecs*1000 <= System.currentTimeMillis()) {
+				throw new TimeoutException("Some mandatory fields are still empty.");
+			}
 		}
 	}
 
 	/**
-	 * Searches for the Applicaiton Name, Clicks the module under the application.
+	 * Searches for the Application Name, Clicks the module under the application.
 	 * 
 	 * @param applicationName
 	 *            - The name of the Application
@@ -339,10 +327,10 @@ public class ServiceNow {
 						return;
 					}
 				}
-				// throw new Exception("Module Not Found");
+				throw new NotFoundException("Module by the name of ["+moduleName+"] was not found.");
 			}
 		}
-		// throw new Exception("Application Not Found");
+		throw new NotFoundException("Application by the name of ["+applicationName+"] was not found.");
 	}
 
 	/**
@@ -383,8 +371,6 @@ public class ServiceNow {
 		}
 		mGTypeArea.sendKeys(content);
 		mGTypeArea.sendKeys(Keys.ENTER);
-		//this.typeInElement(mGTypeArea, content);
-
 	}
 
 

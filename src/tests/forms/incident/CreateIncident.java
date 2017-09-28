@@ -3,6 +3,8 @@ package tests.forms.incident;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Test;
 
 import tests.BaseTest;
@@ -15,11 +17,11 @@ public class CreateIncident extends BaseTest{
 		super(environment);
 	}
 	
-	public void testProcess() {
+	public void testProcess() throws TimeoutException {
 		//No Super.testProcess() because it extends the BaseTest Class
 		//Code here should do the manual process a user would do
 		serviceNow.ChooseApplicationAndModule("Incident", "Create New");
-		serviceNow.populateFieldByLabel("Caller","Abel Tuter");
+		//serviceNow.populateFieldByLabel("Caller","Abel Tuter");
 		serviceNow.populateFieldByLabel("Short description","Test Data");
 		serviceNow.waitUntilMandatoryReferenceFieldsPopulate(10);
 		
@@ -30,7 +32,11 @@ public class CreateIncident extends BaseTest{
 
 	@Test
 	public void validate() {
-		testProcess();
+		try {
+			testProcess();
+		} catch (TimeoutException e) {
+			e.printStackTrace();
+		}
 		//Run Validation to make sure things happened correctly
 		serviceNow.searchFor(this.IncNumber);
 		if(serviceNow.getFieldValueByLabel("Number").equalsIgnoreCase(this.IncNumber)) {

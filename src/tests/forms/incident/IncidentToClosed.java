@@ -3,6 +3,8 @@ package tests.forms.incident;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Test;
 
 public class IncidentToClosed extends IncidentToWorkInProgress {
@@ -10,10 +12,9 @@ public class IncidentToClosed extends IncidentToWorkInProgress {
 
 	public IncidentToClosed(String environment) {
 		super(environment);
-		// TODO Auto-generated constructor stub
 	}
 
-	public void testProcess() {
+	public void testProcess() throws TimeoutException {
 		super.testProcess();
 		serviceNow.searchFor(this.IncNumber);
 		serviceNow.populateFieldByLabel("State", "Closed");
@@ -30,9 +31,10 @@ public class IncidentToClosed extends IncidentToWorkInProgress {
 	public void validate() {
 		try {
 			testProcess();
-		} catch (Exception e) {
-			fail(e.getMessage());
+		} catch (TimeoutException e) {
+			e.printStackTrace();
 		}
+
 		//Run Validation to make sure things happened correctly
 		serviceNow.searchFor(this.IncNumber);
 		if(serviceNow.getFieldValueByLabel("Short description").equalsIgnoreCase("Moved incident to Closed") &&
