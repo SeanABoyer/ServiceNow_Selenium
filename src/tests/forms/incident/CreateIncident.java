@@ -15,7 +15,7 @@ public class CreateIncident extends BaseTest{
 		super(environment);
 	}
 	
-	public void testProcess() throws Exception {
+	public void testProcess() {
 		//No Super.testProcess() because it extends the BaseTest Class
 		//Code here should do the manual process a user would do
 		serviceNow.ChooseApplicationAndModule("Incident", "Create New");
@@ -24,18 +24,13 @@ public class CreateIncident extends BaseTest{
 		serviceNow.waitUntilMandatoryReferenceFieldsPopulate(10);
 		
 		this.IncNumber = serviceNow.getFieldValueByLabel("Number");
-		
 		serviceNow.clickButtonByLabel("SUBMIT");
 		
 	}
 
 	@Test
 	public void validate() {
-		try {
-			testProcess();
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
+		testProcess();
 		//Run Validation to make sure things happened correctly
 		serviceNow.searchFor(this.IncNumber);
 		if(serviceNow.getFieldValueByLabel("Number").equalsIgnoreCase(this.IncNumber)) {

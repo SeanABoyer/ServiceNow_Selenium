@@ -13,12 +13,12 @@ public class IncidentToWorkInProgress extends CreateIncident {
 		// TODO Auto-generated constructor stub
 	}
 
-	public void testProcess() throws Exception {
+	public void testProcess() {
 		super.testProcess();
 		serviceNow.searchFor(this.IncNumber);
 		serviceNow.populateFieldByLabel("State", "In Progress");
 		serviceNow.populateFieldByLabel("Short description", "Moved incident to In Progress");
-		serviceNow.clickButtonByLabel("Submit");
+		serviceNow.clickButtonByLabel("Update");
 
 	}
 
