@@ -21,7 +21,7 @@ public class CreateIncident extends BaseTest{
 		//No Super.testProcess() because it extends the BaseTest Class
 		//Code here should do the manual process a user would do
 		serviceNow.ChooseApplicationAndModule("Incident", "Create New");
-		//serviceNow.populateFieldByLabel("Caller","Abel Tuter");
+		serviceNow.populateFieldByLabel("Caller","Abel Tuter");
 		serviceNow.populateFieldByLabel("Short description","Test Data");
 		serviceNow.waitUntilMandatoryReferenceFieldsPopulate(10);
 		
