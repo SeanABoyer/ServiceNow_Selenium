@@ -7,13 +7,13 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
-import tests.forms.incident.CreateIncident;
+import tests.forms.incident.H_CreateIncident;
 
-public class CreateProblemFromIncident extends CreateIncident {
+public class H_CreateProblemFromIncident extends H_CreateIncident {
 	
 	protected String PrbNumber = null;
 	
-	public CreateProblemFromIncident(String environment) {
+	public H_CreateProblemFromIncident(String environment) {
 		super(environment);
 	}
 
@@ -23,7 +23,6 @@ public class CreateProblemFromIncident extends CreateIncident {
 		serviceNow.clickContextMenuItem("Create Problem");
 		
 		this.PrbNumber = serviceNow.getFieldValueByLabel("Number");
-		System.out.println(this.PrbNumber);
 	}
 
 	@Test
@@ -44,7 +43,6 @@ public class CreateProblemFromIncident extends CreateIncident {
 		//Check if INC is linked to PRB from PRB form
 		serviceNow.searchFor(this.IncNumber);
 		serviceNow.clickTabByLabel("Related Records");
-		System.out.println(serviceNow.getFieldValueByLabel("Problem"));
 		if(serviceNow.getFieldValueByLabel("Problem").equalsIgnoreCase(this.PrbNumber)) {
 			IncLinkedtoPrb = true;
 		}

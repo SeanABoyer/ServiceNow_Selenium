@@ -7,10 +7,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
-public class IncidentToClosed extends IncidentToWorkInProgress {
+public class H_IncidentToClosed extends H_IncidentToWorkInProgress {
 	
 
-	public IncidentToClosed(String environment) {
+	public H_IncidentToClosed(String environment) {
 		super(environment);
 	}
 

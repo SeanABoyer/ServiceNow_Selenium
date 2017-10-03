@@ -13,11 +13,11 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class ServiceNow {
-	private WebDriver _driver;
-	private WebDriverWait _wait;
+	protected WebDriver _driver;
+	protected WebDriverWait _wait;
 	private boolean _formFocused = false;
 	private Actions _action;
-
+	
 	public ServiceNow(WebDriver driver) {
 		_driver = driver;
 		_wait = new WebDriverWait(_driver, 10);
@@ -27,6 +27,51 @@ public class ServiceNow {
 	//================================================================================
 	// Getters
 	//================================================================================
+	
+	/**
+	 * @category Get Message
+	 */
+	private List<WebElement> getInfoMessages() {
+		this.focusForm(true);
+		List<WebElement> infoMessages = _driver.findElements(By.className("outputmsg_info"));
+		return infoMessages;
+	}
+	
+	/**
+	 * @category Get Message
+	 */
+	public WebElement getInfoMessageContaining(String substring) {
+		List<WebElement> infoMessages = getInfoMessages();
+		WebElement messageElement = null;
+		for (int i = 0; i < infoMessages.size(); i++) {
+			if(infoMessages.get(i).findElement(By.className("outputmsg_text")).getText().trim().contains(substring)){
+				messageElement = infoMessages.get(i);
+			}
+		}
+		return messageElement;		
+	}
+	/**
+	 * @category Get Message
+	 */
+	private List<WebElement> getErrorMessages() {
+		this.focusForm(true);
+		List<WebElement> infoMessages = _driver.findElements(By.className("outputmsg_info"));
+		return infoMessages;
+	}
+	
+	/**
+	 * @category Get Message
+	 */
+	public WebElement getErrorMessageContaining(String substring) {
+		List<WebElement> errorMessages = getErrorMessages();
+		WebElement messageElement = null;
+		for (int i = 0; i < errorMessages.size(); i++) {
+			if(errorMessages.get(i).findElement(By.className("outputmsg_text")).getText().trim().contains(substring)){
+				messageElement = errorMessages.get(i);
+			}
+		}
+		return messageElement;		
+	}
 	/**
 	 * @category Get Field ID
 	 */
@@ -228,9 +273,20 @@ public class ServiceNow {
 	//================================================================================
 	// Other
 	//================================================================================
+	private boolean isFieldReadOnly(WebElement element) {
+		//TODO - 
+		return false;
+	}
 	private String getFieldType(WebElement element) {
 		this.focusForm(true);
 		String type = element.findElement(By.id(element.getAttribute("id").replaceFirst("element", "label"))).getAttribute("type");
+		try {
+			if(type.equalsIgnoreCase("Choice") && element.findElement(By.tagName("select")).getAttribute("disabled").equalsIgnoreCase("true")) {
+				type = "String";
+			}
+		}catch (Exception ex) {
+			//TODO - find a way to check if the field is readonly.
+		}
 		return type;
 	}
 	
@@ -322,8 +378,6 @@ public class ServiceNow {
 					if (modules.get(j).getText().trim().equalsIgnoreCase(moduleName)) {
 						// Found Module
 						modules.get(j).click();
-						_wait.until(ExpectedConditions
-								.refreshed(ExpectedConditions.presenceOfElementLocated(By.name("gsft_main"))));
 						return;
 					}
 				}
@@ -332,7 +386,7 @@ public class ServiceNow {
 		}
 		throw new NotFoundException("Application by the name of ["+applicationName+"] was not found.");
 	}
-
+	
 	/**
 	 * If the Service Now environment is using Basic Auth, it this method will login
 	 * for the user. Called in the BaseTest class.

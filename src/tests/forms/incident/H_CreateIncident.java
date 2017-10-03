@@ -9,11 +9,11 @@ import org.junit.Test;
 
 import tests.BaseTest;
 
-public class CreateIncident extends BaseTest{
+public class H_CreateIncident extends BaseTest{
 
 	protected String IncNumber = null;
 	
-	public CreateIncident(String environment) {
+	public H_CreateIncident(String environment) {
 		super(environment);
 	}
 	
