@@ -10,7 +10,6 @@
 
 ## TODO
 	-Add functionality to test multiple browsers while still testing multiple instances.
-	-Add functionality for checking gs.addinfoMessage and gs.adderrorMessage
 	-Add functionality for service portal testing.
 		-Try to take care of general things.
 	-Add support for Jakarta.
